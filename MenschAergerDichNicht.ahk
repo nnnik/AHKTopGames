@@ -3,19 +3,8 @@ SetBatchLines,-1
 
 GUI, New
 GUI, +hwndGUI1
-CoordMode, Mouse, Client
-
-
-display1 := new display( GUI1, [ 11, 11 ] )
-
-file   := fileOpen( "Coords.txt", "r" )
-
-
-redraw := display1.draw.bind( display1 )
-OnMessage( 0xF, redraw )
 GUi,Show, w600 h600
-Loop
-	( new Game( display1 ) ).runSimulation()
+(new Game( new display( GUI1, [ 11, 11 ] ) ) ).runSimulation()	
 ExitApp
 return
 
@@ -56,20 +45,18 @@ class Game
 				{
 					Random, diceValue, 1, 6
 					units := player.getMoveableUnits( diceValue )
-					;Tooltip % player.getColor() . ":" . diceValue
+					Tooltip % player.getColor() . ":" . diceValue
 					if ( units.Length() )
 					{
 						Random, selectValue, 1, % units.Length()
 						units[ selectValue ].Move( diceValue )
 					}
 					This.display.draw()
-					;Sleep 200
-				}Until ( diceValue != 6 && ( !player.isAllowedToThrow3Times() || A_Index = 3 ) ) || player.isFinished()
+				}Until ( diceValue != 6 && ( !player.isAllowedToThrow3Times() || A_Index >= 3 ) ) || player.isFinished()
 				if ( player.isFinished() )
 					This.winners.Push( This.players.Delete( each ) )
 			}
 		}
-		TrayTip, Finished, Simulation finished after %turn% turns, 3
 	}
 	
 	loadFields()
