@@ -5,7 +5,7 @@ GUI, New
 GUI, +hwndGUI1
 GUi,Show, w600 h600
 (new Game( new display( GUI1, [ 11, 11 ] ) ) ).runSimulation()	
-ExitApp
+Reload
 return
 
 GUIClose:
