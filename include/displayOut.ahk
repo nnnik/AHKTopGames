@@ -722,7 +722,7 @@ class gdipAPI extends displayBackendAPI
 		setSize( size )
 		{
 			This.size := size
-			This.bitmap := new GDIp.Bitmap( size* )
+			This.bitmap := new GDIp.Bitmap( size )
 			This.setDrawStyle()
 			This.touch()
 		}

@@ -11,6 +11,13 @@ return
 GUIClose:
 ExitApp
 
+class GameData
+{
+	
+	set
+	
+}
+
 class Game
 {
 	
@@ -34,29 +41,74 @@ class Game
 		This.winners := []
 	}
 	
-	runSimulation()
+	roll()
 	{
-		While This.players.Length()
-		{
-			turn := A_Index
-			For each, player in This.players
-			{
-				Loop
-				{
-					Random, diceValue, 1, 6
-					units := player.getMoveableUnits( diceValue )
-					Tooltip % player.getColor() . ":" . diceValue
-					if ( units.Length() )
-					{
-						Random, selectValue, 1, % units.Length()
-						units[ selectValue ].Move( diceValue )
-					}
-					This.display.draw()
-				}Until ( diceValue != 6 && ( !player.isAllowedToThrow3Times() || A_Index >= 3 ) ) || player.isFinished()
-				if ( player.isFinished() )
-					This.winners.Push( This.players.Delete( each ) )
-			}
-		}
+		This.playerRoll++
+		Random, diceValue, 1, 6
+		This.setDiceValue( diceValue )
+	}
+	
+	setDiceValue( diceValue )
+	{
+		This.diceValue := diceValue
+	}
+	
+	getDiceValue()
+	{
+		return This.diceValue
+	}
+	
+	changePlayer()
+	{
+		player            := This.players[ This.activeNr := mod( This.activeNr++, This.players.Length() ) + 1 ? This.activeNr : This.activeNr := 1 ]
+		This.wasAllowed   := player.isAllowedToThrow3Times()
+		This.playerRoll   := 0
+		This.setActivePlayer( player )
+	}
+	
+	setActivePlayer( player )
+	{
+		This.activePlayer := player
+	}
+	
+	getActivePlayer()
+	{
+		return This.activePlayer
+	}
+	
+	setFinished()
+	{
+		This.finished := 1
+	}
+	
+	getFinished()
+	{
+		return This.hasKey( "finished" ) && This.finished
+	}
+	
+	offerChoice()
+	{
+		This.clearPlayerChoice()
+		This.choices := This.getActivePlayer().getMoveableUnits( This.getDiceValue() )
+		if ( choiceNr := This.getActivePlayer.offerChoice( This.choices ) )
+			This.setPlayerChoice( choiceNr )
+	}
+	
+	clearPlayerChoice()
+	{
+		This.delete( "choiceNr" )
+	}
+	
+	
+	setPlayerChoice( choiceNr )
+	{
+		This.choiceNr := choiceNr
+		This.doTurn()
+	}
+	
+	getPlayerChoice()
+	{
+		return This.choices[ This.choiceNr ]
 	}
 	
 	loadFields()
