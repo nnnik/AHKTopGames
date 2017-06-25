@@ -5,7 +5,7 @@
 
 
 
-class specificGameData
+class specificGameData extends baseGameData
 {
 	
 	class Player extends baseGameData.basePlayer
@@ -37,7 +37,7 @@ class specificGameData
 		setPosition( region, fieldNr )
 		{
 			This.field.remove( This )
-			This.field := gameData.getField( region, mod( fieldNr + this.player.offset[ this.player.color ], 40 ) )
+			This.field := This.GameData.getField( region, mod( fieldNr + this.player.offset[ this.player.color ], 40 ) )
 			This.field.placeOn( This )
 		}
 		

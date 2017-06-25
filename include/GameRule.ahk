@@ -8,5 +8,9 @@ class GameRule
 		This.GameData := GameData
 	}
 	
+	sendChoice(  )
+	
+	
+	
 	
 }

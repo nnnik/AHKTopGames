@@ -7,6 +7,16 @@
 		This.initFields()
 	}
 	
+	__Get( key )
+	{
+		if ( !( key = "base" ) && This.base.hasKey( key ) && isObject( obj := This.base[ key ] ) )
+		{
+			obj := obj.Clone()
+			obj.GameData := This
+			return obj
+		}
+	}
+	
 	initFields()
 	{
 		if !isObject( file := fileOpen( This.fieldFile, "r" ) )
@@ -100,22 +110,22 @@
 	
 }
 
-class serverGameData extends baseGameData
+class baseServerHandler
 {
+	
 	static wrapped := []
 	
-	__New()
+	__New( GameData )
 	{
 		This.buffer  := []
 		This.clients := []
-		if !This.wrapped[ &( This.base ) ]
+		if !This.wrapped[ &( GameData.base ) ]
 		{
-			This.wrapped[ &( This.base ) ] := 1
-			For each, obj in This.base
+			This.wrapped[ &( GameData.base ) ] := 1
+			For each, obj in GameData.base
 				if obj.isGameObj
 					This.wrapObj( obj )	
 		}
-		baseGameData.__New.Call( This )
 	}
 	
 	wrapObj( obj )
@@ -162,7 +172,7 @@ class serverGameData extends baseGameData
 			cmdStr := message.3.Length() ? SubStr( cmdStr, 1, -1 ) . ")" : cmdStr . ")"
 		}
 		For each, clientChannel in This.clients
-			clientChannel.notify( messages )
+			clientChannel.notify( cmdStr )
 	}
 	
 }
@@ -182,7 +192,7 @@ class baseClientHandler
 	
 	data := {}
 	
-	setGameData( gameData )
+	__New( gameData )
 	{
 		This.gameData := gameData
 	}
@@ -190,10 +200,11 @@ class baseClientHandler
 	recv( message )
 	{
 		lastFound := 1
-		While lastFound := RegExMatch( message, "(\w+)(\d*)(\.[\w_]+)?\(([^\)]*)\)", funcCall, lastFound + strLen( funcCall ) )
+		funcCall  := ""
+		While lastFound := RegExMatch( message, "([A-Za-z_]+)(\d*)(?:\.([\w_]+))?\(([^\)]*)\)", funcCall, lastFound + strLen( funcCall ) )
 		{
 			params := StrSplit( funcCall4, "," )
-			for each param in params
+			for each, param in params
 			{
 				if param ~= "^"".*""$"
 					params[each] := SubStr( param, 2, -1 )
@@ -201,11 +212,11 @@ class baseClientHandler
 					params[each] := This.data[param]
 			}
 			if ( funcCall3 = "__New" )
-				This.data[ funcCall1 . funcCall2 ] := New This.gameData[ funcCall1 ]( params* )
+				objBase := This.gameData[ funcCall1 ], This.data[ funcCall1 . funcCall2 ] := New objBase( params* )
 			else if ( funcCall3 = "__Delete" )
 				This.data[ funcCall1 . funcCall2 ].__Delete(), This.data.delete( funcCall1 . funcCall2 )
 			else
-				This.data[ funcCall1 . funcCall2 ][ funcCall3 ]( params* )
+				This.data[ funcCall1 . funcCall2 ][ funcCall3 ].Call( This.data[ funcCall1 . funcCall2 ] ,params* )
 		}
 		This.finishRecv()
 	}
